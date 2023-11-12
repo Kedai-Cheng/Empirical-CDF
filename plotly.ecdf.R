@@ -15,18 +15,6 @@ plotly.ecdf <- function(data,
                         lwd = 1,
                         line.color = "#1f77b4",
                         line.type = c("solid","dash","dot","dashdot")){
-  #########################
-  n.samples <- dim(data)[2]
-  if (length(pt.color) != n.samples){
-    warning("length(pt.color) does not equal to number of samples",call.=TRUE)
-    pt.color <- rep(pt.color[1] , n.samples)
-  }
-  
-  if (length(line.color) != n.samples){
-    warning("length(line.color) does not equal to number of samples",call.=TRUE)
-    line.color <- rep(line.color[1] , n.samples)
-  }
-  
   min.grand <- min(data)
   max.grand <- max(data)
   plot.x.min <- min.grand - (max.grand-min.grand)/10
@@ -47,9 +35,11 @@ plotly.ecdf <- function(data,
                         tickfont = list(y.tick.size),
                         titlefont = list(y.lab.size),
                         zeroline = FALSE))
-  ### Start for loop for each sample ###
-  for (i in 1:n.samples) {
-    x <- data[,i]
+  ##################
+  ### One-Sample ###
+  ##################
+  if (is.vector(data)){
+    x <- data
     n <- length(x)
     x.sort <- sort(x)
     knot <- unique(x.sort)
@@ -73,9 +63,57 @@ plotly.ecdf <- function(data,
       add_trace(x = plot.x , y = plot.y , type = "scatter" , mode = "lines+markers",
                 marker = list(size = c(rep(lwd , 3),
                                        rep(c(pt.cex , lwd , lwd) , n)),
-                              color = pt.color[i]),
-                line = list(width = lwd , color = line.color[i] , dash = line.type),
-                name = paste("Sample" , i))
+                              color = pt.color[1],
+                              line=list(width=0)),
+                line = list(width = lwd , color = line.color[1] , dash = line.type),
+                name = paste("Sample" , 1))
+  }
+  #################
+  ### K-samples ###
+  #################
+  else{
+    n.samples <- dim(data)[2]
+    if (length(pt.color) != n.samples){
+      warning("length(pt.color) does not equal to number of samples",call.=TRUE)
+      pt.color <- rep(pt.color[1] , n.samples)
+    }
+    
+    if (length(line.color) != n.samples){
+      warning("length(line.color) does not equal to number of samples",call.=TRUE)
+      line.color <- rep(line.color[1] , n.samples)
+    }
+    
+    ### Start for loop for each sample ###
+    for (i in 1:n.samples) {
+      x <- data[,i]
+      n <- length(x)
+      x.sort <- sort(x)
+      knot <- unique(x.sort)
+      ecdf <- rep(NA , length(knot)) 
+      
+      for (j in 1:length(knot)){
+        ecdf[j] <- sum(x <= knot[j])/n
+      }
+      # Store result #
+      result <- c(result , list(data.frame(cbind(knot , ecdf))))
+      # plot #
+      plot.x <- c(plot.x.min,
+                  rep(knot , each = 3),
+                  plot.x.max)
+      plot.y <- c(0 , 0)
+      for (k in 1:length(knot)){
+        plot.y <- c(plot.y , NA , rep(ecdf[k] , 2))
+      }
+      
+      plot <- plot %>%
+        add_trace(x = plot.x , y = plot.y , type = "scatter" , mode = "lines+markers",
+                  marker = list(size = c(rep(lwd , 3),
+                                         rep(c(pt.cex , lwd , lwd) , n)),
+                                color = pt.color[i],
+                                line=list(width=0)),
+                  line = list(width = lwd , color = line.color[i] , dash = line.type),
+                  name = paste("Sample" , i))
+    }
   }
   ############################
   print(plot)
@@ -86,12 +124,17 @@ plotly.ecdf <- function(data,
 #####################
 ###### Example ######
 #####################
-n <- 10
+# One-Sample #
+set.seed(100)
+n <- 100
+x <- rnorm(n)
+plotly.ecdf(data = x , pt.color = "red")
+
+# K-samples #
+set.seed(100)
+n <- 100
 data <- cbind(rnorm(n),
               rexp(n),
               rpois(n , lambda = 2))
-plotly.ecdf(data = data , line.type = "dot",
-            pt.color = c("red" , "blue" , "black" , "orange"),
-            line.color = c("red" , "blue" , "black" , "orange"),
-            pt.cex=20,
-            lwd = 10)
+plotly.ecdf(data = data , pt.cex = 12 , pt.color = c("red","yellow","lightblue"),
+            line.color = c("red","yellow","lightblue"))
