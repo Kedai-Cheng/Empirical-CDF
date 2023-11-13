@@ -11,7 +11,7 @@ multi.ecdf <- function(data){
     ecdf <- rep(NA , length(knot)) 
     
     for (j in 1:length(knot)){
-      ecdf[j] <- sum(x <= knot[j])/n
+      ecdf[j] <- mean(x <= knot[j] , na.rm = TRUE)
     }
     # Store result #
     result <- c(result , list("Sample 1" = data.frame(cbind(knot , ecdf))))
@@ -30,7 +30,7 @@ multi.ecdf <- function(data){
       ecdf <- rep(NA , length(knot)) 
       
       for (j in 1:length(knot)){
-        ecdf[j] <- sum(x <= knot[j])/n
+        ecdf[j] <- mean(x <= knot[j] , na.rm = TRUE)
       }
       # Store result #
       result <- c(result , 

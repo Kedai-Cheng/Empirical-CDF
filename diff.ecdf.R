@@ -4,8 +4,8 @@ diff.ecdf <- function(x , y) {
   combined <- sort(c(x,y))
   ecdf.x <- ecdf.y <- rep(NA , length(combined))
   for (i in 1:length(combined)){
-    ecdf.x[i] <- mean(x <= combined[i])
-    ecdf.y[i] <- mean(y <= combined[i])
+    ecdf.x[i] <- mean(x <= combined[i] , na.rm = TRUE)
+    ecdf.y[i] <- mean(y <= combined[i] , na.rm = TRUE)
   }
   
   diff <- abs(ecdf.x - ecdf.y)
@@ -27,5 +27,5 @@ diff.ecdf <- function(x , y) {
 #####################
 set.seed(100)
 x <- rnorm(100)
-y <- rexp(60)
+y <- c(rexp(60))
 diff.ecdf(x = x , y = y)
