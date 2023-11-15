@@ -15,8 +15,8 @@ plotly.ecdf <- function(data,
                         color = "#1f77b4",
                         line.type = c("solid","dash","dot","dashdot")){
   library(plotly)
-  min.grand <- min(data)
-  max.grand <- max(data)
+  min.grand <- min(data , na.rm = TRUE)
+  max.grand <- max(data , na.rm = TRUE)
   plot.x.min <- min.grand - (max.grand-min.grand)/10
   plot.x.max <- max.grand + (max.grand-min.grand)/10
   
