@@ -15,7 +15,8 @@ plotly.ecdf <- function(data,
                         color = "#1f77b4",
                         line.type = c("solid","dash","dot","dashdot"),
                         plot.bg.color = "#f6f6f6",
-                        paper.bg.color = "#f6f6f6"){
+                        paper.bg.color = "#f6f6f6",
+                        legend.names = NULL){
   library(plotly)
   min.grand <- min(data , na.rm = TRUE)
   max.grand <- max(data , na.rm = TRUE)
@@ -38,11 +39,19 @@ plotly.ecdf <- function(data,
                         titlefont = list(y.lab.size),
                         zeroline = FALSE),
            plot_bgcolor  = plot.bg.color,
-           paper_bgcolor = paper.bg.color)
+           paper_bgcolor = paper.bg.color,
+           legend = list(font = list(size = legend.size)))
   ##################
   ### One-Sample ###
   ##################
   if (is.vector(data)){
+    
+    if(is.null(legend.names)){
+      legend.names <- paste("Sample" , 1)
+    } else {
+      legend.names <- legend.names[1]
+    }
+    
     x <- data
     n <- length(x)
     x.sort <- sort(x)
@@ -53,7 +62,7 @@ plotly.ecdf <- function(data,
       ecdf[j] <- mean(x <= knot[j] , na.rm = TRUE)
     }
     # Store result #
-    result <- c(result , list("Sample 1" = data.frame(cbind(knot , ecdf))))
+    result <- c(result , list(legend.names = data.frame(cbind(knot , ecdf))))
     # plot #
     plot.x <- c(plot.x.min,
                 rep(knot , each = 3),
@@ -70,13 +79,22 @@ plotly.ecdf <- function(data,
                               color = color[1],
                               line=list(width=0)),
                 line = list(width = lwd , color = color[1] , dash = line.type),
-                name = paste("Sample" , 1))
+                name = legend.names)
   }
   #################
   ### K-samples ###
   #################
   else{
     n.samples <- dim(data)[2]
+    
+    if(is.null(legend.names)){
+      legend.names <- paste("Sample" , 1:n.samples)
+    } else {
+      if (length(legend.names) != n.samples){
+        warning("length(legend.names) does not equal to number of samples",call.=TRUE)
+        legend.names <- rep(legend.names[1] , n.samples)
+      }
+    }
     
     if (length(color) != n.samples){
       warning("length(color) does not equal to number of samples",call.=TRUE)
@@ -97,7 +115,7 @@ plotly.ecdf <- function(data,
       # Store result #
       result <- c(result , 
                   list(data.frame(cbind(knot , ecdf))))
-      names(result)[i] <- paste(c("Sample ",i) , collapse = "")
+      names(result)[i] <- legend.names[i]
       # plot #
       plot.x <- c(plot.x.min,
                   rep(knot , each = 3),
@@ -114,7 +132,7 @@ plotly.ecdf <- function(data,
                                 color = color[i],
                                 line=list(width=0)),
                   line = list(width = lwd , color = color[i] , dash = line.type),
-                  name = paste("Sample" , i))
+                  name = legend.names[i])
     }
   }
   ############################
