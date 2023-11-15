@@ -13,7 +13,9 @@ plotly.ecdf <- function(data,
                         cex = 6,
                         lwd = 1,
                         color = "#1f77b4",
-                        line.type = c("solid","dash","dot","dashdot")){
+                        line.type = c("solid","dash","dot","dashdot"),
+                        plot.bg.color = "#f6f6f6",
+                        paper.bg.color = "#f6f6f6"){
   library(plotly)
   min.grand <- min(data , na.rm = TRUE)
   max.grand <- max(data , na.rm = TRUE)
@@ -34,7 +36,9 @@ plotly.ecdf <- function(data,
            yaxis = list(title = y.lab,
                         tickfont = list(y.tick.size),
                         titlefont = list(y.lab.size),
-                        zeroline = FALSE))
+                        zeroline = FALSE),
+           plot_bgcolor  = plot.bg.color,
+           paper_bgcolor = paper.bg.color)
   ##################
   ### One-Sample ###
   ##################
